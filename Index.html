@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doando Cachorros — Uma versão demonstrativa inspirada no projeto DoaDog</title>
+  <meta name="description" content="Vitrine de cães disponíveis para adoção responsável integrada dinamicamente ao Google Sheets via Google Apps Script.">
+  
+  <!-- Inclusão modular dos estilos CSS -->
+  <?!= include('Styles'); ?>
+</head>
+<body>
+
+  <!-- CABEÇALHO DO SITE -->
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="site-brand">
+        <span class="site-brand-icon" aria-hidden="true">🐶</span>
+        <h1 class="site-title">Doando Cachorros</h1>
+      </div>
+      <p class="site-subtitle">Uma versão demonstrativa inspirada no projeto DoaDog</p>
+      <p class="hero-text">“Encontre um novo amigo e ajude a transformar uma vida.”</p>
+      <p class="hero-explanation">
+        ℹ️ Os animais exibidos nesta página são carregados diretamente de uma planilha de cadastro. As informações são atualizadas conforme novos cães são cadastrados.
+      </p>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="container" id="mainContent" role="main">
+
+    <!-- SEÇÃO DE FILTROS E PESQUISA -->
+    <section class="filter-section" aria-labelledby="filterHeading">
+      <div class="filter-header">
+        <div class="filter-heading-group">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          <h2 id="filterHeading">Filtrar Cães para Adoção</h2>
+        </div>
+        <div class="filter-actions">
+          <button type="button" id="btnResetFilters" class="btn btn-outline btn-sm" title="Limpar todos os filtros">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+            Limpar filtros
+          </button>
+          <button type="button" id="btnRefresh" class="btn btn-outline btn-sm" title="Recarregar dados direto da planilha">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            Atualizar lista
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-grid">
+        <!-- Campo de Pesquisa Textual -->
+        <div class="filter-group full-width-on-small">
+          <label for="searchInput" class="filter-label">Buscar por nome, raça ou cidade:</label>
+          <div class="input-with-icon">
+            <span class="input-icon" aria-hidden="true">🔍</span>
+            <input type="search" id="searchInput" class="filter-input" placeholder="Ex: Rex, Sapiranga, dócil..." autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Filtro Sexo -->
+        <div class="filter-group">
+          <label for="filterSexo" class="filter-label">Sexo:</label>
+          <select id="filterSexo" class="filter-select">
+            <option value="">Todos os sexos</option>
+          </select>
+        </div>
+
+        <!-- Filtro Porte -->
+        <div class="filter-group">
+          <label for="filterPorte" class="filter-label">Porte:</label>
+          <select id="filterPorte" class="filter-select">
+            <option value="">Todos os portes</option>
+          </select>
+        </div>
+
+        <!-- Filtro Idade -->
+        <div class="filter-group">
+          <label for="filterIdade" class="filter-label">Idade:</label>
+          <select id="filterIdade" class="filter-select">
+            <option value="">Todas as idades</option>
+          </select>
+        </div>
+
+        <!-- Filtro Cidade -->
+        <div class="filter-group">
+          <label for="filterCidade" class="filter-label">Cidade / Local:</label>
+          <select id="filterCidade" class="filter-select">
+            <option value="">Todas as cidades</option>
+          </select>
+        </div>
+
+        <!-- Filtro Status -->
+        <div class="filter-group">
+          <label for="filterStatus" class="filter-label">Situação:</label>
+          <select id="filterStatus" class="filter-select">
+            <option value="">Todas as situações</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- BARRA DE STATUS / CONTADOR -->
+    <div class="status-bar" aria-live="polite">
+      <div id="resultsCount" class="results-count">
+        Carregando cães...
+      </div>
+    </div>
+
+    <!-- ESTADO: CARREGANDO -->
+    <div id="loadingState" class="state-container" role="status">
+      <div class="spinner" aria-hidden="true"></div>
+      <h3 class="state-title">Carregando cachorros da planilha...</h3>
+      <p class="state-message">Por favor, aguarde alguns instantes enquanto consultamos os dados atualizados.</p>
+    </div>
+
+    <!-- ESTADO: ERRO -->
+    <div id="errorState" class="state-container state-error" style="display: none;" role="alert">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;" aria-hidden="true">⚠️</div>
+      <h3 class="state-title">Não foi possível carregar os cachorros</h3>
+      <p id="errorMessage" class="state-message">Ocorreu uma falha ao consultar a planilha.</p>
+      <button type="button" id="btnRetry" class="btn btn-primary">
+        Tentar novamente
+      </button>
+    </div>
+
+    <!-- ESTADO: NENHUM RESULTADO -->
+    <div id="emptyState" class="state-container" style="display: none;">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;" aria-hidden="true">🔎🐕</div>
+      <h3 class="state-title">Nenhum cão encontrado</h3>
+      <p class="state-message">Não encontramos nenhum amigo de quatro patas com os filtros selecionados. Tente ajustar os termos da pesquisa.</p>
+    </div>
+
+    <!-- GRID DINÂMICO DE CARDS -->
+    <div id="dogsGrid" class="dogs-grid" style="display: none;" aria-label="Lista de cães para adoção">
+      <!-- Inserido dinamicamente via Javascript -->
+    </div>
+
+  </main>
+
+  <!-- MODAL DE DETALHES DO CACHORRO -->
+  <div id="dogModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="modalTitle" class="modal-title">Detalhes do Cãozinho</h2>
+        <button type="button" id="modalCloseBtn" class="modal-close-btn" aria-label="Fechar janela de detalhes">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="modalImageWrapper" class="modal-image-wrapper">
+          <!-- Imagem inserida dinamicamente -->
+        </div>
+
+        <div id="modalBadges" class="modal-badges">
+          <!-- Tags inseridas dinamicamente -->
+        </div>
+
+        <h3 class="modal-section-title">Sobre o Cão</h3>
+        <p id="modalDescription" class="modal-description-text"></p>
+
+        <h3 class="modal-section-title">Ficha Informativa</h3>
+        <div id="modalDetailsGrid" class="modal-details-grid">
+          <!-- Detalhes inseridos dinamicamente -->
+        </div>
+
+        <div id="modalContactBox" class="modal-contact-box" style="display: none;">
+          <h3>📞 Como adotar este amiguinho?</h3>
+          <p id="modalContactText"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="modalFooterCloseBtn" class="btn btn-outline">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RODAPÉ DO SITE -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p class="footer-title">Doando Cachorros — Projeto acadêmico</p>
+      <p class="footer-text">Protótipo desenvolvido para demonstrar uma plataforma de divulgação de cães para adoção responsável.</p>
+      <p class="footer-credit">Integração dinâmica em tempo real com Google Sheets via Google Apps Script.</p>
+    </div>
+  </footer>
+
+  <!-- Inclusão modular dos scripts JavaScript -->
+  <?!= include('Scripts'); ?>
+
+</body>
+</html>

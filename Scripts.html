@@ -1,0 +1,524 @@
+<script>
+  /**
+   * ====================================================================
+   * PROJETO: DOANDO CACHORROS (Inspirado no DoaDog)
+   * CLIENT-SIDE LOGIC & INTERAÇÃO (Scripts.html)
+   * ====================================================================
+   */
+
+  // Estado global da aplicação
+  var state = {
+    allDogs: [],
+    filteredDogs: [],
+    isLoading: true,
+    lastSelectedDog: null
+  };
+
+  // Ícone SVG Fallback de Cachorrinho amigável para quando não houver foto
+  var DOG_SVG_PLACEHOLDER = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.55.06-1.09.16-1.61.94.34 2.12.61 3.5.61 3.58 0 5.48-1.78 6.34-3.34.86 1.56 2.76 3.34 6.34 3.34 1.38 0 2.56-.27 3.5-.61.1.52.16 1.06.16 1.61 0 4.41-3.59 8-8 8zM8.5 9.5c-.83 0-1.5-.67-1.5-1.5S7.67 6.5 8.5 6.5 10 7.17 10 8s-.67 1.5-1.5 1.5zm7 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>';
+
+  /**
+   * Sanitiza strings para exibição segura no DOM evitando ataques XSS.
+   */
+  function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    var str = String(text);
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  /**
+   * Inicialização quando a página terminar de carregar
+   */
+  document.addEventListener('DOMContentLoaded', function() {
+    setupEventListeners();
+    fetchDogs();
+  });
+
+  /**
+   * Configura os ouvintes de eventos da interface
+   */
+  function setupEventListeners() {
+    // Inputs de filtro
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('filterSexo').addEventListener('change', applyFilters);
+    document.getElementById('filterPorte').addEventListener('change', applyFilters);
+    document.getElementById('filterIdade').addEventListener('change', applyFilters);
+    document.getElementById('filterCidade').addEventListener('change', applyFilters);
+    document.getElementById('filterStatus').addEventListener('change', applyFilters);
+
+    // Botões
+    document.getElementById('btnResetFilters').addEventListener('click', resetFilters);
+    document.getElementById('btnRefresh').addEventListener('click', fetchDogs);
+    document.getElementById('btnRetry').addEventListener('click', fetchDogs);
+
+    // Fechar Modal
+    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('modalFooterCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('dogModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    // Tecla ESC para fechar o modal (Acessibilidade)
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var modal = document.getElementById('dogModal');
+        if (modal.classList.contains('is-open')) {
+          closeModal();
+        }
+      }
+    });
+  }
+
+  /**
+   * Carrega os cachorros chamando o Google Apps Script backend
+   */
+  function fetchDogs() {
+    showLoading();
+
+    // Se estiver rodando dentro do Google Apps Script
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(onFetchSuccess)
+        .withFailureHandler(onFetchError)
+        .getDogs();
+    } else {
+      // Mock de desenvolvimento local caso aberto diretamente em navegador comum fora do GAS
+      console.warn("Ambiente local detectado. Executando simulação.");
+      setTimeout(function() {
+        var demoData = {
+          success: true,
+          sheetName: "Cadastro de Cachorro (respostas)",
+          total: 4,
+          dogs: [
+            {
+              id: "dog_1",
+              linha: 2,
+              nome: "Rex",
+              foto: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&auto=format&fit=crop&q=80",
+              idade: "2 anos",
+              sexo: "Macho",
+              porte: "Médio",
+              raca: "Vira-lata",
+              cidade: "Sapiranga - RS",
+              descricao: "Rex é muito dócil, brincalhão e adora correr no quintal. Se dá super bem com crianças.",
+              status: "Disponível",
+              observacoes: "Castrado, vacinado e vermifugado.",
+              contato: "(51) 99999-8888",
+              detalhesCompletos: [
+                { titulo: "Castrado?", valor: "Sim" },
+                { titulo: "Vacinado?", valor: "Sim (V10 + Raiva)" },
+                { titulo: "Sociável com outros cães?", valor: "Sim" }
+              ]
+            },
+            {
+              id: "dog_2",
+              linha: 3,
+              nome: "Mel",
+              foto: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=600&auto=format&fit=crop&q=80",
+              idade: "1 ano",
+              sexo: "Fêmea",
+              porte: "Pequeno",
+              raca: "SRD",
+              cidade: "Novo Hamburgo - RS",
+              descricao: "Mel é calminha, carinhosa e ótima para apartamento. Já aprendeu a fazer necessidades no tapete higiênico.",
+              status: "Disponível",
+              observacoes: "Vacinada e castrada.",
+              contato: "adocao@doadog.org",
+              detalhesCompletos: [
+                { titulo: "Castrado?", valor: "Sim" },
+                { titulo: "Sociável com gatos?", valor: "Sim" }
+              ]
+            },
+            {
+              id: "dog_3",
+              linha: 4,
+              nome: "Thor",
+              foto: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&auto=format&fit=crop&q=80",
+              idade: "3 anos",
+              sexo: "Macho",
+              porte: "Grande",
+              raca: "Labrador Mix",
+              cidade: "São Leopoldo - RS",
+              descricao: "Thor é cheio de energia, adora passeios longos e precisa de espaço para brincar.",
+              status: "Em processo",
+              observacoes: "Adora brincar de buscar a bolinha.",
+              contato: "(51) 98888-7777",
+              detalhesCompletos: [
+                { titulo: "Castrado?", valor: "Sim" }
+              ]
+            },
+            {
+              id: "dog_4",
+              linha: 5,
+              nome: "Pipoca",
+              foto: "",
+              idade: "5 meses",
+              sexo: "Fêmea",
+              porte: "Pequeno",
+              raca: "SRD",
+              cidade: "Porto Alegre - RS",
+              descricao: "Filhotinha resgatada muito alegre, esperando uma família amorosa.",
+              status: "Disponível",
+              observacoes: "Primeira dose da vacina aplicada.",
+              contato: "(51) 97777-6666",
+              detalhesCompletos: []
+            }
+          ]
+        };
+        onFetchSuccess(demoData);
+      }, 700);
+    }
+  }
+
+  /**
+   * Callback em caso de sucesso no getDogs()
+   */
+  function onFetchSuccess(response) {
+    if (!response || !response.success) {
+      showError(response ? response.error : "Não foi possível carregar a lista de cães.");
+      return;
+    }
+
+    state.allDogs = response.dogs || [];
+    populateFilterOptions(state.allDogs);
+    applyFilters();
+    hideLoading();
+  }
+
+  /**
+   * Callback em caso de falha no getDogs()
+   */
+  function onFetchError(error) {
+    var msg = (error && error.message) ? error.message : "Não foi possível carregar os cachorros da planilha. Verifique a conexão e tente novamente.";
+    showError(msg);
+  }
+
+  /**
+   * Preenche dinamicamente os menus de seleção (selects) com os valores reais da planilha
+   */
+  function populateFilterOptions(dogs) {
+    var sexes = new Set();
+    var sizes = new Set();
+    var ages = new Set();
+    var cities = new Set();
+    var statuses = new Set();
+
+    dogs.forEach(function(dog) {
+      if (dog.sexo && dog.sexo !== 'Não informado') sexes.add(dog.sexo);
+      if (dog.porte && dog.porte !== 'Não informado') sizes.add(dog.porte);
+      if (dog.idade && dog.idade !== 'Não informada') ages.add(dog.idade);
+      if (dog.cidade && dog.cidade !== 'Não informada') cities.add(dog.cidade);
+      if (dog.status) statuses.add(dog.status);
+    });
+
+    populateSelect('filterSexo', Array.from(sexes));
+    populateSelect('filterPorte', Array.from(sizes));
+    populateSelect('filterIdade', Array.from(ages));
+    populateSelect('filterCidade', Array.from(cities));
+    populateSelect('filterStatus', Array.from(statuses));
+  }
+
+  function populateSelect(selectId, items) {
+    var select = document.getElementById(selectId);
+    var currentValue = select.value;
+    
+    // Mantém a primeira opção ("Todos...")
+    var firstOption = select.options[0];
+    select.innerHTML = '';
+    select.appendChild(firstOption);
+
+    items.sort().forEach(function(item) {
+      var opt = document.createElement('option');
+      opt.value = item;
+      opt.textContent = item;
+      select.appendChild(opt);
+    });
+
+    // Restaura o valor se ainda existir
+    if (currentValue && items.indexOf(currentValue) !== -1) {
+      select.value = currentValue;
+    }
+  }
+
+  /**
+   * Aplica os filtros de busca no cliente em tempo real
+   */
+  function applyFilters() {
+    var search = document.getElementById('searchInput').value.toLowerCase().trim();
+    var selSexo = document.getElementById('filterSexo').value;
+    var selPorte = document.getElementById('filterPorte').value;
+    var selIdade = document.getElementById('filterIdade').value;
+    var selCidade = document.getElementById('filterCidade').value;
+    var selStatus = document.getElementById('filterStatus').value;
+
+    state.filteredDogs = state.allDogs.filter(function(dog) {
+      // Busca textual (Nome, Raça, Descrição, Cidade)
+      if (search) {
+        var matchNome = (dog.nome || '').toLowerCase().indexOf(search) !== -1;
+        var matchRaca = (dog.raca || '').toLowerCase().indexOf(search) !== -1;
+        var matchDesc = (dog.descricao || '').toLowerCase().indexOf(search) !== -1;
+        var matchCid = (dog.cidade || '').toLowerCase().indexOf(search) !== -1;
+        if (!matchNome && !matchRaca && !matchDesc && !matchCid) return false;
+      }
+
+      // Filtro Sexo
+      if (selSexo && dog.sexo !== selSexo) return false;
+
+      // Filtro Porte
+      if (selPorte && dog.porte !== selPorte) return false;
+
+      // Filtro Idade
+      if (selIdade && dog.idade !== selIdade) return false;
+
+      // Filtro Cidade
+      if (selCidade && dog.cidade !== selCidade) return false;
+
+      // Filtro Status
+      if (selStatus && dog.status !== selStatus) return false;
+
+      return true;
+    });
+
+    renderDogsGrid(state.filteredDogs);
+    updateCounter(state.filteredDogs.length, state.allDogs.length);
+  }
+
+  /**
+   * Limpa todos os filtros
+   */
+  function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterSexo').value = '';
+    document.getElementById('filterPorte').value = '';
+    document.getElementById('filterIdade').value = '';
+    document.getElementById('filterCidade').value = '';
+    document.getElementById('filterStatus').value = '';
+    applyFilters();
+  }
+
+  /**
+   * Renderiza os cards de cães no grid
+   */
+  function renderDogsGrid(dogs) {
+    var container = document.getElementById('dogsGrid');
+    var emptyState = document.getElementById('emptyState');
+
+    if (!dogs || dogs.length === 0) {
+      container.innerHTML = '';
+      container.style.display = 'none';
+      emptyState.style.display = 'block';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    container.style.display = 'grid';
+
+    var html = '';
+    dogs.forEach(function(dog) {
+      var statusClass = 'dog-status-available';
+      var statusLower = (dog.status || '').toLowerCase();
+      if (statusLower.indexOf('adotad') !== -1) {
+        statusClass = 'dog-status-adopted';
+      } else if (statusLower.indexOf('process') !== -1 || statusLower.indexOf('analis') !== -1) {
+        statusClass = 'dog-status-process';
+      }
+
+      var photoHtml = '';
+      if (dog.foto) {
+        photoHtml = '<img src="' + escapeHtml(dog.foto) + '" alt="Foto de ' + escapeHtml(dog.nome) + '" class="dog-card-image" loading="lazy" onerror="this.parentElement.innerHTML = \'<div class=\\\'dog-placeholder-image\\\'>' + DOG_SVG_PLACEHOLDER + '<span>Sem foto</span></div>\';">';
+      } else {
+        photoHtml = '<div class="dog-placeholder-image">' + DOG_SVG_PLACEHOLDER + '<span>Sem foto cadastrada</span></div>';
+      }
+
+      var subtituloInfo = [dog.idade, dog.porte].filter(function(v) { return v && v !== 'Não informada' && v !== 'Não informado'; }).join(' • ');
+      if (!subtituloInfo) subtituloInfo = dog.raca || 'Adoção responsável';
+
+      html += `
+        <article class="dog-card" id="${escapeHtml(dog.id)}">
+          <div class="dog-card-image-wrapper">
+            ${photoHtml}
+            <span class="dog-status-tag ${statusClass}">${escapeHtml(dog.status)}</span>
+          </div>
+          <div class="dog-card-body">
+            <div class="dog-header">
+              <h3 class="dog-name">${escapeHtml(dog.nome)}</h3>
+              <p class="dog-subtitle">${escapeHtml(subtituloInfo)}</p>
+            </div>
+            <div class="dog-meta-list">
+              <div class="dog-meta-item">
+                <strong>Sexo:</strong> <span>${escapeHtml(dog.sexo)}</span>
+              </div>
+              <div class="dog-meta-item">
+                <strong>Localização:</strong> <span>${escapeHtml(dog.cidade)}</span>
+              </div>
+            </div>
+            <p class="dog-description">“${escapeHtml(dog.descricao)}”</p>
+            <div class="dog-card-footer">
+              <button type="button" class="btn btn-primary" onclick="openDogModal('${escapeHtml(dog.id)}')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Ver detalhes
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  /**
+   * Abre o modal com os detalhes completos do cachorro
+   */
+  function openDogModal(dogId) {
+    var dog = state.allDogs.find(function(d) { return d.id === dogId; });
+    if (!dog) return;
+
+    state.lastSelectedDog = dog;
+
+    // Foto do Modal
+    var modalImgWrapper = document.getElementById('modalImageWrapper');
+    if (dog.foto) {
+      modalImgWrapper.innerHTML = '<img src="' + escapeHtml(dog.foto) + '" alt="Foto ampliada de ' + escapeHtml(dog.nome) + '" class="modal-image">';
+    } else {
+      modalImgWrapper.innerHTML = '<div class="dog-placeholder-image">' + DOG_SVG_PLACEHOLDER + '<span>Foto não disponível</span></div>';
+    }
+
+    // Título
+    document.getElementById('modalTitle').textContent = dog.nome;
+
+    // Badges
+    var badgesContainer = document.getElementById('modalBadges');
+    var badgesHtml = '';
+    if (dog.status) badgesHtml += '<span class="modal-tag">Status: ' + escapeHtml(dog.status) + '</span>';
+    if (dog.sexo && dog.sexo !== 'Não informado') badgesHtml += '<span class="modal-tag">Sexo: ' + escapeHtml(dog.sexo) + '</span>';
+    if (dog.porte && dog.porte !== 'Não informado') badgesHtml += '<span class="modal-tag">Porte: ' + escapeHtml(dog.porte) + '</span>';
+    if (dog.idade && dog.idade !== 'Não informada') badgesHtml += '<span class="modal-tag">Idade: ' + escapeHtml(dog.idade) + '</span>';
+    if (dog.raca) badgesHtml += '<span class="modal-tag">Raça: ' + escapeHtml(dog.raca) + '</span>';
+    badgesContainer.innerHTML = badgesHtml;
+
+    // Descrição
+    document.getElementById('modalDescription').textContent = dog.descricao;
+
+    // Grid de Informações
+    var detailsGrid = document.getElementById('modalDetailsGrid');
+    var detailsHtml = `
+      <div class="modal-detail-card">
+        <div class="label">Cidade / Local</div>
+        <div class="value">${escapeHtml(dog.cidade)}</div>
+      </div>
+      <div class="modal-detail-card">
+        <div class="label">Raça</div>
+        <div class="value">${escapeHtml(dog.raca)}</div>
+      </div>
+      <div class="modal-detail-card">
+        <div class="label">Idade Estimada</div>
+        <div class="value">${escapeHtml(dog.idade)}</div>
+      </div>
+      <div class="modal-detail-card">
+        <div class="label">Porte</div>
+        <div class="value">${escapeHtml(dog.porte)}</div>
+      </div>
+    `;
+
+    if (dog.observacoes) {
+      detailsHtml += `
+        <div class="modal-detail-card" style="grid-column: 1 / -1;">
+          <div class="label">Observações de Saúde / Cuidados</div>
+          <div class="value">${escapeHtml(dog.observacoes)}</div>
+        </div>
+      `;
+    }
+
+    // Adiciona outros campos dinâmicos da planilha caso existam
+    if (dog.detalhesCompletos && dog.detalhesCompletos.length > 0) {
+      dog.detalhesCompletos.forEach(function(item) {
+        if (item.titulo.toLowerCase().indexOf('contato') === -1 && 
+            item.titulo.toLowerCase().indexOf('whatsapp') === -1 &&
+            item.titulo.toLowerCase().indexOf('telefone') === -1) {
+          detailsHtml += `
+            <div class="modal-detail-card">
+              <div class="label">${escapeHtml(item.titulo)}</div>
+              <div class="value">${escapeHtml(item.valor)}</div>
+            </div>
+          `;
+        }
+      });
+    }
+
+    detailsGrid.innerHTML = detailsHtml;
+
+    // Bloco de Contato (exibido apenas se fornecido na planilha para adoção)
+    var contactBox = document.getElementById('modalContactBox');
+    if (dog.contato && dog.contato.trim() !== "") {
+      contactBox.style.display = 'block';
+      document.getElementById('modalContactText').textContent = dog.contato;
+    } else {
+      contactBox.style.display = 'none';
+    }
+
+    // Exibe o modal
+    var modal = document.getElementById('dogModal');
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden'; // Evita scroll de fundo
+    document.getElementById('modalCloseBtn').focus();
+  }
+
+  /**
+   * Fecha o modal
+   */
+  function closeModal() {
+    var modal = document.getElementById('dogModal');
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  /**
+   * Atualiza o contador de resultados encontrados
+   */
+  function updateCounter(filteredCount, totalCount) {
+    var countElement = document.getElementById('resultsCount');
+    if (filteredCount === totalCount) {
+      countElement.innerHTML = `Exibindo <span class="results-badge">${filteredCount}</span> ${filteredCount === 1 ? 'cão disponível' : 'cães cadastrados'}`;
+    } else {
+      countElement.innerHTML = `<span class="results-badge">${filteredCount}</span> de ${totalCount} cães encontrados com os filtros atuais`;
+    }
+  }
+
+  /**
+   * Exibe estado de carregamento
+   */
+  function showLoading() {
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('errorState').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('dogsGrid').style.display = 'none';
+  }
+
+  /**
+   * Oculta o estado de carregamento
+   */
+  function hideLoading() {
+    document.getElementById('loadingState').style.display = 'none';
+  }
+
+  /**
+   * Exibe estado de erro
+   */
+  function showError(message) {
+    hideLoading();
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('dogsGrid').style.display = 'none';
+    
+    var errState = document.getElementById('errorState');
+    document.getElementById('errorMessage').textContent = message || "Não foi possível carregar os cachorros. Tente novamente.";
+    errState.style.display = 'block';
+  }
+</script>
