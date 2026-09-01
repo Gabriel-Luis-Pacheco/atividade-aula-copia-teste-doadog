@@ -4,16 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Doando Cachorros — Uma versão demonstrativa inspirada no projeto DoaDog</title>
-  <meta name="description" content="Vitrine de cães disponíveis para adoção responsável conectada dinamicamente ao Google Sheets via Google Apps Script.">
+  <meta name="description" content="Vitrine moderna e interativa de cães disponíveis para adoção responsável.">
   
-  <!-- Tipografia Moderna do Google Fonts (Plus Jakarta Sans & Outfit) -->
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐶</text></svg>">
+
+  <!-- Google Fonts: Outfit (Títulos) & Plus Jakarta Sans (Textos) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     /* ====================================================================
-     * DESIGN SYSTEM — DOANDO CACHORROS (ESTILO MODERNO E RESPONSIVO)
+     * DESIGN SYSTEM — DOANDO CACHORROS (MODERNO, ELEGANTE E RESPONSIVO)
      * ==================================================================== */
     :root {
       --primary: #0f766e;
@@ -78,8 +81,8 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Acessibilidade - Foco Visível */
-    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+    /* Acessibilidade: foco visível */
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
       outline: 3px solid var(--border-focus);
       outline-offset: 3px;
     }
@@ -91,11 +94,47 @@
       width: 100%;
     }
 
+    /* NAVBAR SUPERIOR */
+    .top-navbar {
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      background-color: rgba(255, 255, 255, 0.95);
+    }
+
+    .top-navbar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: var(--primary);
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
     /* CABEÇALHO HERO */
     .site-header {
       background: radial-gradient(circle at top center, #f0fdfa 0%, #ffffff 70%, #f8fafc 100%);
       border-bottom: 1px solid var(--border-color);
-      padding: 3.5rem 0 2.75rem;
+      padding: 3.5rem 0 3rem;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -148,8 +187,8 @@
 
     .site-title {
       font-family: var(--font-heading);
-      font-size: 3rem;
-      font-weight: 800;
+      font-size: 3.25rem;
+      font-weight: 900;
       color: var(--primary);
       letter-spacing: -0.03em;
       line-height: 1.15;
@@ -157,33 +196,33 @@
     }
 
     .site-subtitle {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
     }
 
     .hero-quote {
-      font-size: 1.3rem;
+      font-size: 1.35rem;
       font-weight: 500;
       color: var(--text-main);
-      max-width: 650px;
-      margin: 0 auto 1.25rem;
+      max-width: 680px;
+      margin: 0 auto 1.5rem;
       line-height: 1.4;
     }
 
     .hero-notice {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
       font-size: 0.92rem;
       color: var(--text-muted);
-      max-width: 760px;
+      max-width: 780px;
       margin: 0 auto;
       background-color: #ffffff;
-      padding: 0.75rem 1.4rem;
+      padding: 0.75rem 1.5rem;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-sm);
@@ -201,7 +240,6 @@
       margin: 2.5rem auto 1.5rem;
       box-shadow: var(--shadow-md);
       border: 1px solid var(--border-color);
-      position: relative;
     }
 
     .filter-panel-header {
@@ -218,7 +256,7 @@
     .filter-panel-title {
       font-family: var(--font-heading);
       font-size: 1.25rem;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--text-main);
       display: flex;
       align-items: center;
@@ -282,7 +320,7 @@
       font-size: 1rem;
     }
 
-    .form-input, .form-select {
+    .form-input, .form-select, .form-textarea {
       width: 100%;
       padding: 0.75rem 1rem;
       border: 1.5px solid var(--border-color);
@@ -298,7 +336,7 @@
       padding-left: 2.6rem;
     }
 
-    .form-input:focus, .form-select:focus {
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
       border-color: var(--border-focus);
       box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.12);
       outline: none;
@@ -336,6 +374,16 @@
       box-shadow: 0 6px 14px rgba(15, 118, 110, 0.35);
     }
 
+    .btn-accent {
+      background-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
+    }
+
+    .btn-accent:hover {
+      background-color: var(--accent-hover);
+    }
+
     .btn-outline {
       background-color: transparent;
       border-color: var(--border-color);
@@ -348,21 +396,12 @@
       border-color: #cbd5e1;
     }
 
-    .btn-accent {
-      background-color: var(--accent);
-      color: #ffffff;
-    }
-
-    .btn-accent:hover {
-      background-color: var(--accent-hover);
-    }
-
     .btn-sm {
       padding: 0.45rem 0.95rem;
       font-size: 0.85rem;
     }
 
-    /* BARRA DE CONTADOR DE RESULTADOS */
+    /* BARRA DE CONTADOR REATIVO */
     .results-bar {
       display: flex;
       justify-content: space-between;
@@ -574,7 +613,7 @@
       width: 100%;
     }
 
-    /* ESTADOS DA PÁGINA (CARREGANDO, ERRO, VAZIO) */
+    /* ESTADOS DA PÁGINA */
     .status-panel {
       text-align: center;
       padding: 4.5rem 2rem;
@@ -614,11 +653,7 @@
       font-size: 0.98rem;
     }
 
-    .status-panel.error .status-panel-title {
-      color: #dc2626;
-    }
-
-    /* MODAL DE DETALHES */
+    /* MODAL PADRÃO */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -808,7 +843,7 @@
       font-size: 1.05rem;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
 
     .modal-foot {
@@ -816,6 +851,7 @@
       border-top: 1px solid var(--border-color);
       display: flex;
       justify-content: flex-end;
+      gap: 0.75rem;
       background-color: #f8fafc;
       border-bottom-left-radius: var(--radius-lg);
       border-bottom-right-radius: var(--radius-lg);
@@ -825,28 +861,28 @@
     .site-footer {
       background-color: #ffffff;
       border-top: 1px solid var(--border-color);
-      padding: 3rem 0;
+      padding: 3.5rem 0;
       margin-top: auto;
       text-align: center;
     }
 
     .footer-heading {
       font-family: var(--font-heading);
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: 800;
       color: var(--primary);
       margin-bottom: 0.4rem;
     }
 
     .footer-desc {
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       color: var(--text-muted);
       max-width: 640px;
       margin: 0 auto;
     }
 
     .footer-sub {
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       color: var(--text-light);
       margin-top: 1.25rem;
     }
@@ -854,7 +890,25 @@
 </head>
 <body>
 
-  <!-- CABEÇALHO DO SITE -->
+  <!-- BARRA DE NAVEGAÇÃO SUPERIOR -->
+  <nav class="top-navbar" role="navigation" aria-label="Menu principal">
+    <div class="container top-navbar-content">
+      <a href="#" class="nav-brand">
+        <span style="font-size: 1.5rem;">🐶</span>
+        <span>Doando Cachorros</span>
+      </a>
+      <div class="nav-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="btnOpenSheetModal" title="Conectar ou alterar planilha Google Sheets">
+          📊 Conectar Planilha
+        </button>
+        <button type="button" class="btn btn-accent btn-sm" id="btnOpenAddDogModal" title="Cadastrar novo cãozinho">
+          ➕ Cadastrar Cão
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CABEÇALHO HERO -->
   <header class="site-header" role="banner">
     <div class="container">
       <div class="brand-pill">
@@ -866,12 +920,12 @@
       <p class="hero-quote">“Encontre um novo amigo e ajude a transformar uma vida.”</p>
       <div class="hero-notice">
         <span>ℹ️</span>
-        <p>Os animais exibidos nesta página são carregados <strong>diretamente da planilha de cadastro</strong>. As informações são atualizadas conforme novos cães são cadastrados.</p>
+        <p>Os animais exibidos nesta página são carregados <strong>dinamicamente</strong> a partir de uma base de cadastro. As informações são atualizadas em tempo real conforme novos cães são cadastrados.</p>
       </div>
     </div>
   </header>
 
-  <!-- ÁREA PRINCIPAL -->
+  <!-- CONTEÚDO PRINCIPAL -->
   <main class="container" id="mainContent" role="main">
 
     <!-- PAINEL DE FILTROS -->
@@ -891,8 +945,8 @@
             </svg>
             Limpar filtros
           </button>
-          <button type="button" id="btnRefresh" class="btn btn-primary btn-sm" title="Recarregar dados diretamente da planilha">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" id="refreshIcon" aria-hidden="true">
+          <button type="button" id="btnRefresh" class="btn btn-primary btn-sm" title="Recarregar catálogo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
               <polyline points="23 4 23 10 17 10"></polyline>
               <polyline points="1 20 1 14 7 14"></polyline>
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
@@ -903,7 +957,7 @@
       </div>
 
       <div class="filter-grid">
-        <!-- Busca Textual -->
+        <!-- Campo de Pesquisa Textual -->
         <div class="filter-group search-group">
           <label for="searchInput" class="filter-label">🔍 Pesquisar por nome, raça ou cidade:</label>
           <div class="input-wrapper">
@@ -957,23 +1011,15 @@
     <!-- BARRA DE CONTADOR REATIVO -->
     <div class="results-bar" aria-live="polite">
       <div id="resultsCount" class="results-badge-container">
-        Consultando planilha...
+        Carregando cães...
       </div>
     </div>
 
     <!-- ESTADO: CARREGANDO -->
     <div id="loadingState" class="status-panel" role="status">
       <div class="spinner-ring" aria-hidden="true"></div>
-      <h3 class="status-panel-title">Carregando cachorros da planilha...</h3>
-      <p class="status-panel-msg">Aguarde alguns instantes enquanto lemos as linhas e colunas atualizadas do Google Sheets.</p>
-    </div>
-
-    <!-- ESTADO: ERRO -->
-    <div id="errorState" class="status-panel error" style="display: none;" role="alert">
-      <div style="font-size: 3.5rem; margin-bottom: 0.5rem;" aria-hidden="true">⚠️</div>
-      <h3 class="status-panel-title">Não foi possível carregar os cachorros</h3>
-      <p id="errorMessage" class="status-panel-msg">Ocorreu um erro na consulta aos dados da planilha.</p>
-      <button type="button" id="btnRetry" class="btn btn-primary">Tentar novamente</button>
+      <h3 class="status-panel-title">Carregando catálogo de cachorros...</h3>
+      <p class="status-panel-msg">Aguarde alguns instantes enquanto organizamos a vitrine de cães.</p>
     </div>
 
     <!-- ESTADO: NENHUM RESULTADO -->
@@ -989,12 +1035,12 @@
 
   </main>
 
-  <!-- MODAL DE DETALHES -->
+  <!-- MODAL: DETALHES DO CACHORRO -->
   <div id="dogModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
     <div class="modal-card">
       <div class="modal-head">
         <h2 id="modalTitle" class="modal-head-title">Ficha do Cãozinho</h2>
-        <button type="button" id="modalCloseBtn" class="modal-close" aria-label="Fechar janela">✕</button>
+        <button type="button" class="modal-close" id="modalCloseBtn" aria-label="Fechar janela">✕</button>
       </div>
       <div class="modal-content-area">
         <div id="modalImageWrapper" class="modal-hero-photo"></div>
@@ -1024,21 +1070,244 @@
     </div>
   </div>
 
+  <!-- MODAL: CADASTRAR NOVO CÃOZINHO -->
+  <div id="addDogModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="addDogTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="addDogTitle" class="modal-head-title">➕ Cadastrar Novo Cãozinho</h2>
+        <button type="button" class="modal-close" id="addDogCloseBtn" aria-label="Fechar janela">✕</button>
+      </div>
+      <form id="addDogForm" class="modal-content-area">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="filter-group" style="grid-column: span 2;">
+            <label class="filter-label" for="dogFormNome">Nome do Cão *</label>
+            <input type="text" id="dogFormNome" class="form-input" placeholder="Ex: Bob, Belinha..." required>
+          </div>
+
+          <div class="filter-group" style="grid-column: span 2;">
+            <label class="filter-label" for="dogFormFoto">Link da Foto (URL ou Google Drive)</label>
+            <input type="url" id="dogFormFoto" class="form-input" placeholder="https://exemplo.com/foto.jpg ou link do Google Drive">
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="dogFormSexo">Sexo</label>
+            <select id="dogFormSexo" class="form-select">
+              <option value="Macho">Macho</option>
+              <option value="Fêmea">Fêmea</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="dogFormPorte">Porte</label>
+            <select id="dogFormPorte" class="form-select">
+              <option value="Pequeno">Pequeno</option>
+              <option value="Médio" selected>Médio</option>
+              <option value="Grande">Grande</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="dogFormIdade">Idade</label>
+            <input type="text" id="dogFormIdade" class="form-input" placeholder="Ex: 2 anos, 6 meses...">
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="dogFormRaca">Raça</label>
+            <input type="text" id="dogFormRaca" class="form-input" placeholder="Ex: Vira-lata, Poodle...">
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="dogFormCidade">Cidade / Estado</label>
+            <input type="text" id="dogFormCidade" class="form-input" placeholder="Ex: Sapiranga - RS">
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="dogFormStatus">Situação</label>
+            <select id="dogFormStatus" class="form-select">
+              <option value="Disponível" selected>Disponível</option>
+              <option value="Em processo">Em processo</option>
+              <option value="Adotado">Adotado</option>
+            </select>
+          </div>
+
+          <div class="filter-group" style="grid-column: span 2;">
+            <label class="filter-label" for="dogFormDesc">História / Descrição</label>
+            <textarea id="dogFormDesc" class="form-textarea" rows="3" placeholder="Conte um pouco sobre o temperamento e hábitos do cãozinho..."></textarea>
+          </div>
+
+          <div class="filter-group" style="grid-column: span 2;">
+            <label class="filter-label" for="dogFormObs">Observações de Saúde e Cuidados</label>
+            <input type="text" id="dogFormObs" class="form-input" placeholder="Ex: Castrado, vacinado, vermifugado...">
+          </div>
+
+          <div class="filter-group" style="grid-column: span 2;">
+            <label class="filter-label" for="dogFormContato">Telefone / WhatsApp para Adoção</label>
+            <input type="text" id="dogFormContato" class="form-input" placeholder="Ex: (51) 99999-8888">
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="btn btn-outline" id="addDogCancelBtn">Cancelar</button>
+          <button type="submit" class="btn btn-accent">Salvar Cãozinho</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONECTAR PLANILHA GOOGLE SHEETS -->
+  <div id="sheetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="sheetTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="sheetTitle" class="modal-head-title">📊 Conectar Planilha Google Sheets</h2>
+        <button type="button" class="modal-close" id="sheetCloseBtn" aria-label="Fechar janela">✕</button>
+      </div>
+      <div class="modal-content-area">
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Você pode conectar qualquer planilha do Google Sheets publicada ou pública. O site lerá os cabeçalhos e importará os cães automaticamente.
+        </p>
+
+        <div class="filter-group" style="margin-bottom: 1.25rem;">
+          <label class="filter-label" for="sheetUrlInput">Link ou ID da Planilha Google Sheets:</label>
+          <input type="text" id="sheetUrlInput" class="form-input" placeholder="https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/edit">
+        </div>
+
+        <div style="background-color: var(--primary-surface); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--primary-border); font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          <strong>💡 Como liberar o acesso da planilha:</strong><br>
+          1. Na sua planilha do Google Sheets, clique no botão <strong>Compartilhar</strong> (canto superior direito).<br>
+          2. Em "Acesso geral", mude para <strong>"Qualquer pessoa com o link"</strong> como Leitor.<br>
+          3. Cole o link no campo acima e clique em "Carregar Planilha".
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="btn btn-outline" id="btnResetToDefaults">Restaurar Padrão</button>
+          <button type="button" class="btn btn-primary" id="btnLoadSheet">Carregar Planilha</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- RODAPÉ -->
   <footer class="site-footer" role="contentinfo">
     <div class="container">
       <p class="footer-heading">Doando Cachorros — Projeto acadêmico</p>
       <p class="footer-desc">Protótipo desenvolvido para demonstrar uma plataforma de divulgação de cães para adoção responsável.</p>
-      <p class="footer-sub">Conexão em tempo real com Google Sheets via Google Apps Script.</p>
+      <p class="footer-sub">Hospedado no GitHub Pages com catálogo interativo e dinâmico.</p>
     </div>
   </footer>
 
-  <!-- LÓGICA JAVASCRIPT REATIVA -->
+  <!-- JAVASCRIPT COMPLETO E REATIVO -->
   <script>
+    // Catálogo inicial com fotos reais de alta resolução e informações completas
+    var INITIAL_DOGS = [
+      {
+        id: "dog_1",
+        nome: "Rex",
+        foto: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=700&auto=format&fit=crop&q=80",
+        idade: "2 anos",
+        sexo: "Macho",
+        porte: "Médio",
+        raca: "Vira-lata",
+        cidade: "Sapiranga - RS",
+        descricao: "Rex é muito dócil, brincalhão e adora correr no quintal. É muito carinhoso e se dá super bem com crianças.",
+        status: "Disponível",
+        observacoes: "Castrado, vacinado (V10 + Raiva) e vermifugado.",
+        contato: "(51) 99999-8888",
+        detalhesCompletos: [
+          { titulo: "Castrado?", valor: "Sim" },
+          { titulo: "Vacinado?", valor: "Sim (Carteira completa)" },
+          { titulo: "Sociável com outros cães?", valor: "Sim" }
+        ]
+      },
+      {
+        id: "dog_2",
+        nome: "Mel",
+        foto: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=700&auto=format&fit=crop&q=80",
+        idade: "1 ano",
+        sexo: "Fêmea",
+        porte: "Pequeno",
+        raca: "SRD",
+        cidade: "Novo Hamburgo - RS",
+        descricao: "Mel é calminha, super dengosa e adora um colinho. Perfeita para apartamento ou pessoas que buscam uma companheira tranquila.",
+        status: "Disponível",
+        observacoes: "Castrada e vacinada. Já usa tapetinho higiênico.",
+        contato: "(51) 98888-1111",
+        detalhesCompletos: [
+          { titulo: "Castrado?", valor: "Sim" },
+          { titulo: "Sociável com gatos?", valor: "Sim" }
+        ]
+      },
+      {
+        id: "dog_3",
+        nome: "Thor",
+        foto: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=700&auto=format&fit=crop&q=80",
+        idade: "3 anos",
+        sexo: "Macho",
+        porte: "Grande",
+        raca: "Labrador Mix",
+        cidade: "São Leopoldo - RS",
+        descricao: "Thor é cheio de vida e energia. Ama passear, buscar bolinhas e tomar banho de mangueira nos dias quentes.",
+        status: "Em processo",
+        observacoes: "Ideal para casas com pátio cercado. Vacinado e vermifugado.",
+        contato: "(51) 97777-2222",
+        detalhesCompletos: [
+          { titulo: "Porte", valor: "Grande (aprox. 28kg)" }
+        ]
+      },
+      {
+        id: "dog_4",
+        nome: "Pipoca",
+        foto: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=700&auto=format&fit=crop&q=80",
+        idade: "5 meses",
+        sexo: "Fêmea",
+        porte: "Pequeno",
+        raca: "SRD",
+        cidade: "Porto Alegre - RS",
+        descricao: "Pipoca é uma filhotinha resgatada muito alegre, curiosa e esperta. Adora brinquedos e aprender truques.",
+        status: "Disponível",
+        observacoes: "Primeira e segunda doses da vacina V10 aplicadas.",
+        contato: "(51) 96666-3333",
+        detalhesCompletos: [
+          { titulo: "Necessita castração futura?", valor: "Sim (Termo de castração obrigatório)" }
+        ]
+      },
+      {
+        id: "dog_5",
+        nome: "Bob",
+        foto: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=700&auto=format&fit=crop&q=80",
+        idade: "4 anos",
+        sexo: "Macho",
+        porte: "Médio",
+        raca: "Beagle Mix",
+        cidade: "Canoas - RS",
+        descricao: "Bob é um cãozinho muito companheiro e leal. Gosta de caminhadas moderadas e de tirar uma soneca no sofá.",
+        status: "Disponível",
+        observacoes: "Castrado, vacinado e microchipado.",
+        contato: "(51) 95555-4444",
+        detalhesCompletos: [
+          { titulo: "Sociável com outros cães?", valor: "Sim" }
+        ]
+      },
+      {
+        id: "dog_6",
+        nome: "Luna",
+        foto: "https://images.unsplash.com/photo-1598133894008-61f7fdb8cc3a?w=700&auto=format&fit=crop&q=80",
+        idade: "2 anos",
+        sexo: "Fêmea",
+        porte: "Médio",
+        raca: "Vira-lata",
+        cidade: "Sapiranga - RS",
+        descricao: "Luna é meiga, companheira e se apega muito rápido aos tutores. Muito boazinha em passeios.",
+        status: "Adotado",
+        observacoes: "Castrada e 100% vacinada. Feliz em seu novo lar!",
+        contato: "",
+        detalhesCompletos: []
+      }
+    ];
+
+    // Estado da aplicação
     var state = {
       allDogs: [],
       filteredDogs: [],
-      isLoading: true,
       lastSelectedDog: null
     };
 
@@ -1054,12 +1323,27 @@
         .replace(/'/g, "&#039;");
     }
 
+    function formatImageUrl(url) {
+      if (!url || typeof url !== "string") return "";
+      url = url.trim();
+      if (url.match(/\.(jpeg|jpg|gif|png|webp|svg|bmp)(\?.*)?$/i)) return url;
+      
+      var driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || 
+                       url.match(/id=([a-zA-Z0-9_-]+)/) ||
+                       url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (driveMatch && driveMatch[1]) {
+        return "https://lh3.googleusercontent.com/d/" + driveMatch[1];
+      }
+      return url;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       setupEventListeners();
-      fetchDogs();
+      loadStoredDogs();
     });
 
     function setupEventListeners() {
+      // Filtros
       document.getElementById('searchInput').addEventListener('input', applyFilters);
       document.getElementById('filterSexo').addEventListener('change', applyFilters);
       document.getElementById('filterPorte').addEventListener('change', applyFilters);
@@ -1068,147 +1352,76 @@
       document.getElementById('filterStatus').addEventListener('change', applyFilters);
 
       document.getElementById('btnResetFilters').addEventListener('click', resetFilters);
-      document.getElementById('btnRefresh').addEventListener('click', fetchDogs);
-      document.getElementById('btnRetry').addEventListener('click', fetchDogs);
+      document.getElementById('btnRefresh').addEventListener('click', function() {
+        loadStoredDogs();
+      });
 
+      // Modal de Detalhes
       document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
       document.getElementById('modalFooterCloseBtn').addEventListener('click', closeModal);
       document.getElementById('dogModal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
       });
 
+      // Modal de Cadastro
+      document.getElementById('btnOpenAddDogModal').addEventListener('click', function() {
+        openAddDogModal();
+      });
+      document.getElementById('addDogCloseBtn').addEventListener('click', closeAddDogModal);
+      document.getElementById('addDogCancelBtn').addEventListener('click', closeAddDogModal);
+      document.getElementById('addDogModal').addEventListener('click', function(e) {
+        if (e.target === this) closeAddDogModal();
+      });
+      document.getElementById('addDogForm').addEventListener('submit', handleAddDogSubmit);
+
+      // Modal de Planilha
+      document.getElementById('btnOpenSheetModal').addEventListener('click', function() {
+        openSheetModal();
+      });
+      document.getElementById('sheetCloseBtn').addEventListener('click', closeSheetModal);
+      document.getElementById('sheetModal').addEventListener('click', function(e) {
+        if (e.target === this) closeSheetModal();
+      });
+      document.getElementById('btnLoadSheet').addEventListener('click', handleFetchFromGoogleSheets);
+      document.getElementById('btnResetToDefaults').addEventListener('click', function() {
+        localStorage.removeItem('doando_cachorros_data');
+        localStorage.removeItem('doando_cachorros_sheet_url');
+        state.allDogs = JSON.parse(JSON.stringify(INITIAL_DOGS));
+        closeSheetModal();
+        initCatalog();
+      });
+
+      // Tecla ESC para fechar modais
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-          var modal = document.getElementById('dogModal');
-          if (modal.classList.contains('open')) closeModal();
+          closeModal();
+          closeAddDogModal();
+          closeSheetModal();
         }
       });
     }
 
-    function fetchDogs() {
+    function loadStoredDogs() {
       showLoading();
-
-      // Verifica se está rodando dentro do Apps Script
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(onFetchSuccess)
-          .withFailureHandler(onFetchError)
-          .getDogs();
+      var stored = localStorage.getItem('doando_cachorros_data');
+      if (stored) {
+        try {
+          state.allDogs = JSON.parse(stored);
+        } catch (e) {
+          state.allDogs = JSON.parse(JSON.stringify(INITIAL_DOGS));
+        }
       } else {
-        // Mock de demonstração para testes locais no navegador (fora do Apps Script)
-        setTimeout(function() {
-          var demoData = {
-            success: true,
-            sheetName: "Cadastro de Cachorro (respostas)",
-            total: 5,
-            dogs: [
-              {
-                id: "dog_1",
-                linha: 2,
-                nome: "Rex",
-                foto: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&auto=format&fit=crop&q=80",
-                idade: "2 anos",
-                sexo: "Macho",
-                porte: "Médio",
-                raca: "Vira-lata",
-                cidade: "Sapiranga - RS",
-                descricao: "Rex é muito dócil, brincalhão e procura uma família amorosa.",
-                status: "Disponível",
-                observacoes: "Castrado, vacinado e vermifugado.",
-                contato: "(51) 99999-8888",
-                detalhesCompletos: [
-                  { titulo: "Castrado?", valor: "Sim" },
-                  { titulo: "Vacinado?", valor: "Sim" }
-                ]
-              },
-              {
-                id: "dog_2",
-                linha: 3,
-                nome: "Mel",
-                foto: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=600&auto=format&fit=crop&q=80",
-                idade: "1 ano",
-                sexo: "Fêmea",
-                porte: "Pequeno",
-                raca: "SRD",
-                cidade: "Novo Hamburgo - RS",
-                descricao: "Mel é calminha, carinhosa e ótima para viver em apartamento.",
-                status: "Disponível",
-                observacoes: "Castrada e vacinada com V10.",
-                contato: "(51) 98888-1111",
-                detalhesCompletos: [
-                  { titulo: "Castrado?", valor: "Sim" }
-                ]
-              },
-              {
-                id: "dog_3",
-                linha: 4,
-                nome: "Thor",
-                foto: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600&auto=format&fit=crop&q=80",
-                idade: "3 anos",
-                sexo: "Macho",
-                porte: "Grande",
-                raca: "Labrador Mix",
-                cidade: "São Leopoldo - RS",
-                descricao: "Thor é enérgico, companheiro e adora correr ao ar livre.",
-                status: "Em processo",
-                observacoes: "Precisa de casa com pátio fechado.",
-                contato: "(51) 97777-2222",
-                detalhesCompletos: []
-              },
-              {
-                id: "dog_4",
-                linha: 5,
-                nome: "Pipoca",
-                foto: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=600&auto=format&fit=crop&q=80",
-                idade: "5 meses",
-                sexo: "Fêmea",
-                porte: "Pequeno",
-                raca: "SRD",
-                cidade: "Porto Alegre - RS",
-                descricao: "Filhotinha resgatada muito afetuosa, adora brincar com bolinhas.",
-                status: "Disponível",
-                observacoes: "Primeira dose da vacina aplicada.",
-                contato: "(51) 96666-3333",
-                detalhesCompletos: []
-              },
-              {
-                id: "dog_5",
-                linha: 6,
-                nome: "Bob",
-                foto: "",
-                idade: "4 anos",
-                sexo: "Macho",
-                porte: "Médio",
-                raca: "Beagle Mix",
-                cidade: "Canoas - RS",
-                descricao: "Super obediente e sociável com outros cachorros.",
-                status: "Disponível",
-                observacoes: "Castrado e vermifugado.",
-                contato: "(51) 95555-4444",
-                detalhesCompletos: []
-              }
-            ]
-          };
-          onFetchSuccess(demoData);
-        }, 500);
+        state.allDogs = JSON.parse(JSON.stringify(INITIAL_DOGS));
       }
+      setTimeout(function() {
+        initCatalog();
+      }, 350);
     }
 
-    function onFetchSuccess(response) {
-      if (!response || !response.success) {
-        showError(response ? response.error : "Não foi possível ler os dados da planilha.");
-        return;
-      }
-
-      state.allDogs = response.dogs || [];
+    function initCatalog() {
       populateFilterOptions(state.allDogs);
       applyFilters();
       hideLoading();
-    }
-
-    function onFetchError(error) {
-      var msg = (error && error.message) ? error.message : "Erro ao carregar cachorros da planilha.";
-      showError(msg);
     }
 
     function populateFilterOptions(dogs) {
@@ -1467,6 +1680,171 @@
       document.body.style.overflow = '';
     }
 
+    // Modal Cadastrar Cão
+    function openAddDogModal() {
+      var modal = document.getElementById('addDogModal');
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('dogFormNome').focus();
+    }
+
+    function closeAddDogModal() {
+      var modal = document.getElementById('addDogModal');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function handleAddDogSubmit(e) {
+      e.preventDefault();
+      var novoCao = {
+        id: "dog_" + Date.now(),
+        nome: document.getElementById('dogFormNome').value.trim() || "Amiguinho sem nome",
+        foto: formatImageUrl(document.getElementById('dogFormFoto').value.trim()),
+        sexo: document.getElementById('dogFormSexo').value,
+        porte: document.getElementById('dogFormPorte').value,
+        idade: document.getElementById('dogFormIdade').value.trim() || "Não informada",
+        raca: document.getElementById('dogFormRaca').value.trim() || "SRD",
+        cidade: document.getElementById('dogFormCidade').value.trim() || "Não informada",
+        status: document.getElementById('dogFormStatus').value,
+        descricao: document.getElementById('dogFormDesc').value.trim() || "Cãozinho esperando por uma família amorosa.",
+        observacoes: document.getElementById('dogFormObs').value.trim() || "",
+        contato: document.getElementById('dogFormContato').value.trim() || "",
+        detalhesCompletos: []
+      };
+
+      state.allDogs.unshift(novoCao);
+      localStorage.setItem('doando_cachorros_data', JSON.stringify(state.allDogs));
+      
+      closeAddDogModal();
+      document.getElementById('addDogForm').reset();
+      initCatalog();
+      alert("🐾 Cachorrinho cadastrado com sucesso!");
+    }
+
+    // Modal Conectar Planilha
+    function openSheetModal() {
+      var modal = document.getElementById('sheetModal');
+      var storedUrl = localStorage.getItem('doando_cachorros_sheet_url') || "";
+      document.getElementById('sheetUrlInput').value = storedUrl;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('sheetUrlInput').focus();
+    }
+
+    function closeSheetModal() {
+      var modal = document.getElementById('sheetModal');
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    // Leitura direta de Google Sheets no navegador
+    function handleFetchFromGoogleSheets() {
+      var urlOrId = document.getElementById('sheetUrlInput').value.trim();
+      if (!urlOrId) {
+        alert("Por favor, cole a URL ou o ID da sua planilha do Google Sheets.");
+        return;
+      }
+
+      var match = urlOrId.match(/\/d\/([a-zA-Z0-9_-]+)/) || urlOrId.match(/id=([a-zA-Z0-9_-]+)/);
+      var sheetId = match ? match[1] : urlOrId;
+
+      var gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+
+      showLoading();
+      closeSheetModal();
+
+      fetch(gvizUrl)
+        .then(function(res) {
+          if (!res.ok) throw new Error("Não foi possível acessar a planilha. Verifique se ela está pública para qualquer pessoa com o link.");
+          return res.text();
+        })
+        .then(function(text) {
+          // Extrai o JSON retornado pelo Google Visualization API
+          var jsonString = text.replace(/^[/*\n\r]*google\.visualization\.Query\.setResponse\(/, '').replace(/\);?\s*$/, '');
+          var data = JSON.parse(jsonString);
+
+          if (!data || !data.table || !data.table.rows) {
+            throw new Error("Formato de dados inesperado na planilha.");
+          }
+
+          var headers = data.table.cols.map(function(c) { return (c ? c.label : "") || ""; });
+          var rows = data.table.rows;
+
+          var parsedDogs = [];
+
+          rows.forEach(function(rowObj, idx) {
+            var row = rowObj.c;
+            if (!row) return;
+
+            var getVal = function(colIndex) {
+              if (colIndex < 0 || colIndex >= row.length || !row[colIndex]) return "";
+              return row[colIndex].v !== null && row[colIndex].v !== undefined ? String(row[colIndex].v).trim() : "";
+            };
+
+            // Busca inteligente de colunas pelos cabeçalhos
+            var findCol = function(keywords) {
+              for (var h = 0; h < headers.length; h++) {
+                var normH = headers[h].toLowerCase();
+                for (var k = 0; k < keywords.length; k++) {
+                  if (normH.indexOf(keywords[k]) !== -1) return h;
+                }
+              }
+              return -1;
+            };
+
+            var nomeIdx = findCol(["nome"]);
+            var fotoIdx = findCol(["foto", "imagem", "anexo", "link", "url"]);
+            var idadeIdx = findCol(["idade", "meses", "anos"]);
+            var sexoIdx = findCol(["sexo", "genero", "macho", "femea"]);
+            var porteIdx = findCol(["porte", "tamanho"]);
+            var racaIdx = findCol(["raca", "tipo"]);
+            var cidadeIdx = findCol(["cidade", "local", "bairro", "uf"]);
+            var descIdx = findCol(["descricao", "historia", "sobre", "resumo"]);
+            var statusIdx = findCol(["status", "situacao"]);
+            var obsIdx = findCol(["observacao", "saude", "cuidados", "castrado"]);
+            var contatoIdx = findCol(["contato", "telefone", "whatsapp"]);
+
+            var nome = nomeIdx !== -1 ? getVal(nomeIdx) : getVal(0);
+            if (!nome) return; // Pula linha vazia
+
+            parsedDogs.push({
+              id: "sheet_dog_" + (idx + 1),
+              nome: nome,
+              foto: formatImageUrl(fotoIdx !== -1 ? getVal(fotoIdx) : ""),
+              idade: (idadeIdx !== -1 ? getVal(idadeIdx) : "") || "Não informada",
+              sexo: (sexoIdx !== -1 ? getVal(sexoIdx) : "") || "Não informado",
+              porte: (porteIdx !== -1 ? getVal(porteIdx) : "") || "Médio",
+              raca: (racaIdx !== -1 ? getVal(racaIdx) : "") || "SRD",
+              cidade: (cidadeIdx !== -1 ? getVal(cidadeIdx) : "") || "Não informada",
+              descricao: (descIdx !== -1 ? getVal(descIdx) : "") || "Cãozinho cadastrado para adoção responsável.",
+              status: (statusIdx !== -1 ? getVal(statusIdx) : "") || "Disponível",
+              observacoes: obsIdx !== -1 ? getVal(obsIdx) : "",
+              contato: contatoIdx !== -1 ? getVal(contatoIdx) : "",
+              detalhesCompletos: []
+            });
+          });
+
+          if (parsedDogs.length > 0) {
+            state.allDogs = parsedDogs;
+            localStorage.setItem('doando_cachorros_data', JSON.stringify(parsedDogs));
+            localStorage.setItem('doando_cachorros_sheet_url', urlOrId);
+            initCatalog();
+            alert(`🎉 Sucesso! Foram importados ${parsedDogs.length} cães da planilha.`);
+          } else {
+            alert("A planilha foi lida, mas nenhuma linha válida de dados foi encontrada.");
+            hideLoading();
+          }
+        })
+        .catch(function(err) {
+          hideLoading();
+          alert("Erro ao conectar à planilha: " + err.message);
+        });
+    }
+
     function updateCounter(filteredCount, totalCount) {
       var countElement = document.getElementById('resultsCount');
       if (filteredCount === totalCount) {
@@ -1478,21 +1856,12 @@
 
     function showLoading() {
       document.getElementById('loadingState').style.display = 'block';
-      document.getElementById('errorState').style.display = 'none';
       document.getElementById('emptyState').style.display = 'none';
       document.getElementById('dogsGrid').style.display = 'none';
     }
 
     function hideLoading() {
       document.getElementById('loadingState').style.display = 'none';
-    }
-
-    function showError(message) {
-      hideLoading();
-      document.getElementById('emptyState').style.display = 'none';
-      document.getElementById('dogsGrid').style.display = 'none';
-      document.getElementById('errorMessage').textContent = message || "Erro ao carregar cachorros da planilha.";
-      document.getElementById('errorState').style.display = 'block';
     }
   </script>
 </body>
